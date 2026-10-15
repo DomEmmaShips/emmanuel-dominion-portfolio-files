@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<!--
+  contact.html : the CONTACT page: a form with name, email, phone and message, checked by js/main.js before it is sent.
+
+  Like every page, it links to the one shared stylesheet (css/style.css) and the one shared
+  script (js/main.js). The header, music player and footer are the same on every page and
+  are explained in full in index.html.
+-->
+<html lang="en">
+<head>
+  <!-- CHARACTER SET and VIEWPORT: explained in index.html. -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TITLE AND DESCRIPTION for this page: shown on the browser tab and in search results. -->
+  <title>Contact | Emmanuel Osezele Dominic</title>
+  <meta name="description" content="Contact Emmanuel Osezele Dominic using the form.">
+
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+
+  <!-- GOOGLE FONTS (Syncopate and Space Mono) and THE SHARED STYLESHEET. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<!-- The page-contact class lets the CSS target this page alone if it ever needs to. -->
+<body class="page-contact">
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- BACKGROUND MUSIC: the same <audio> element as on every page. If the visitor turned the
+       song on, main.js picks it up again here from where it was. -->
+  <audio id="bg-audio" src="audio/celebration.mp3" preload="none" loop>
+    <p>Your browser cannot play this audio. <a href="audio/celebration.mp3">Download "Celebration" by Joeboy</a>.</p>
+  </audio>
+
+  <!-- SITE HEADER AND NAVIGATION: the same on every page. aria-current="page" sits on this
+       page's own link, so it is highlighted and screen readers announce "current page". -->
+  <header class="site-header" id="site-header">
+    <nav class="nav container" aria-label="Main">
+      <a class="nav__brand" href="index.html" aria-label="Emmanuel Osezele Dominic, home">EOD</a>
+
+      <ul class="nav__links" id="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="planner.html">Planner</a></li>
+        <li><a href="contact.html" aria-current="page">Contact</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <!-- MUSIC TOGGLE: plays or pauses the song (aria-pressed shows its state). -->
+        <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false">
+          <span class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+          <span class="music-toggle__label">Music</span>
+        </button>
+
+        <!-- MENU BUTTON: only shown on phones. -->
+        <button class="nav__menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+          <span class="burger" aria-hidden="true"><span></span><span></span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+
+    <!-- ================================================================================
+         PAGE HERO: the page title and a one-line summary, on the dark background with the
+         spotlight. It has the page's single <h1>. hero__fade makes each line fade up in turn.
+         ================================================================================ -->
+    <section class="page-hero" aria-labelledby="page-title">
+      <!-- SPOTLIGHT: the same decorative light as the homepage hero (explained in index.html). -->
+      <svg class="spotlight" aria-hidden="true" focusable="false" viewBox="0 0 3787 2842" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g filter="url(#spotlight-blur)">
+          <ellipse cx="1924.71" cy="273.501" rx="1924.71" ry="273.501" transform="matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)" fill="#DCE6F7" fill-opacity="0.21"></ellipse>
+        </g>
+        <defs>
+          <filter id="spotlight-blur" x="0.860352" y="0.838989" width="3785.16" height="2840.26" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend>
+            <feGaussianBlur stdDeviation="151" result="blurred"></feGaussianBlur>
+          </filter>
+        </defs>
+      </svg>
+      <div class="container page-hero__inner">
+        <h1 class="page-hero__title hero__fade" id="page-title" style="--delay: 0.1s">Contact</h1>
+        <p class="page-hero__lead hero__fade" style="--delay: 0.25s">Questions about cars, about code, or about this site? Send me a message with the form below.</p>
+      </div>
+    </section>
+
+    <!-- ================================================================================
+         THE CONTACT FORM
+         The form talks to Netlify, the host:
+           name="contact" and data-netlify="true" tell Netlify to collect this form's messages
+           (they appear in the site's Netlify dashboard under Forms);
+           the hidden "form-name" input repeats the name, which Netlify needs when the form
+           is sent by JavaScript;
+           netlify-honeypot names a hidden trap field that catches spam robots.
+         novalidate turns off the browser's built-in checks so main.js can run the checks the
+         brief asks for and explain any problem in plain words under the field.
+         Each input's aria-describedby points at its error message (and hint), so a screen
+         reader reads them out when the field is focused.
+         ================================================================================ -->
+    <section class="section section--silver" aria-label="Contact">
+      <div class="container contact__grid">
+        <div class="panel">
+          <form class="contact-form" id="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" aria-labelledby="form-title" novalidate>
+            <h2 class="card-title" id="form-title">Send a message</h2>
+            <p class="contact-form__note">All four fields are required.</p>
+
+            <input type="hidden" name="form-name" value="contact">
+            <p class="form-honeypot"><label>Leave this empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+
+            <div class="field">
+              <label for="contact-name">Name</label>
+              <input id="contact-name" name="name" type="text" autocomplete="name" aria-describedby="contact-name-error">
+              <p class="field__error" id="contact-name-error"></p>
+            </div>
+
+            <div class="field">
+              <label for="contact-email">Email address</label>
+              <input id="contact-email" name="email" type="email" autocomplete="email" aria-describedby="contact-email-error">
+              <p class="field__error" id="contact-email-error"></p>
+            </div>
+
+            <div class="field">
+              <label for="contact-phone">Phone number</label>
+              <p class="field__hint" id="contact-phone-hint">Digits only, with no spaces, dashes or + sign. For example: 08012345678.</p>
+              <input id="contact-phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel" aria-describedby="contact-phone-error contact-phone-hint">
+              <p class="field__error" id="contact-phone-error"></p>
+            </div>
+
+            <div class="field">
+              <label for="contact-message">Message</label>
+              <textarea id="contact-message" name="message" rows="6" aria-describedby="contact-message-error"></textarea>
+              <p class="field__error" id="contact-message-error"></p>
+            </div>
+
+            <div class="contact-form__foot">
+              <button class="btn btn--primary" type="submit" id="contact-submit">Send message <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+              <!-- Problems with sending are written here and announced (role="status"). -->
+              <p class="form-status" id="form-status" role="status"></p>
+            </div>
+          </form>
+
+          <!-- SUCCESS MESSAGE: hidden until the message has been sent. tabindex="-1" lets
+               main.js move focus here, so screen readers announce it straight away. -->
+          <div class="form-success" id="form-success" tabindex="-1" hidden>
+            <span class="icon-badge"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <h2 class="card-title">Message sent.</h2>
+            <p>Thank you, <span id="success-name"></span>. Your message is on its way, and I will reply as soon as I can.</p>
+            <button class="btn btn--outline" type="button" id="send-another">Send another message</button>
+          </div>
+        </div>
+
+        <!-- <aside> holds content related to the form but not part of it. -->
+        <aside class="contact__aside" aria-labelledby="topics-title">
+          <h2 class="card-title" id="topics-title">What to write about</h2>
+          <ul class="topics">
+            <li><span class="icon-badge"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg></span><div><h3>Cars</h3><p>Buying, selling, or just talking about them.</p></div></li>
+            <li><span class="icon-badge"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span><div><h3>Code</h3><p>This site, or the projects I am planning.</p></div></li>
+            <li><span class="icon-badge"><svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg></span><div><h3>Gaming</h3><p>Always a good conversation.</p></div></li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER: identical on every page. main.js writes the current year into data-year. -->
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div class="footer__about">
+        <p class="footer__brand">EOD</p>
+        <p>Emmanuel Osezele Dominic. Car dealer, car enthusiast, gamer, and B.Sc Computer Science student at Miva Open University.</p>
+      </div>
+
+      <nav class="footer__nav" aria-label="Footer">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="planner.html">Planner</a></li>
+          <li><a href="contact.html" aria-current="page">Contact</a></li>
+        </ul>
+      </nav>
+
+      <p class="footer__song">Soundtrack: "Celebration" by Joeboy. Use the Music button at the top to play or pause it.</p>
+    </div>
+
+    <div class="container">
+      <div class="footer__base">
+        <p>&copy; <span data-year>2026</span> Emmanuel Osezele Dominic. Built for COS 106, Introduction to Web Technologies.</p>
+        <p>Photos from <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a>.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- THE SHARED SCRIPT, loaded last so every element above already exists when it runs. -->
+  <script src="js/main.js"></script>
+</body>
+</html>

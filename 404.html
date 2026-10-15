@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<!--
+  404.html : the "page not found" page.
+
+  Netlify (the host) looks for a file with exactly this name. Whenever a visitor asks for
+  a page that does not exist, Netlify sends this page instead of its own plain error
+  screen, so a mistyped link still lands somewhere that looks like the rest of the site.
+  While the About, Projects, Planner and Contact pages are still being built, their
+  links land here too.
+
+  IMPORTANT DIFFERENCE FROM THE OTHER PAGES: every path below starts with "/" (for
+  example /css/style.css instead of css/style.css). A path starting with "/" is
+  "root-relative": it always starts from the top of the website. This page can be shown
+  for ANY missing address, even a deep one like /projects/old/thing, and a plain
+  css/style.css would then be looked for in the wrong folder. Starting from "/" means the
+  stylesheet, script, images and links are found from anywhere.
+  (Because of this, the page only works properly when served by a web server such as
+  Netlify, not when the file is double-clicked on your computer.)
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page not found | Emmanuel Osezele Dominic</title>
+
+  <!-- ROBOTS: "noindex" asks search engines not to list this error page in their results. -->
+  <meta name="robots" content="noindex">
+
+  <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
+
+  <!-- The same Google Fonts and the same external stylesheet as every other page. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="page-404">
+
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- BACKGROUND MUSIC: the same <audio> element as every page, so if the visitor turned the
+       song on, main.js keeps it playing here too. (Full explanation in index.html.) -->
+  <audio id="bg-audio" src="/audio/celebration.mp3" preload="none" loop>
+    <p>Your browser cannot play this audio. <a href="/audio/celebration.mp3">Download "Celebration" by Joeboy</a>.</p>
+  </audio>
+
+  <!-- SITE HEADER AND NAVIGATION: identical to the other pages, except no link carries
+       aria-current="page", because this page is not one of the five in the menu. -->
+  <header class="site-header" id="site-header">
+    <nav class="nav container" aria-label="Main">
+      <a class="nav__brand" href="/" aria-label="Emmanuel Osezele Dominic, home">EOD</a>
+
+      <ul class="nav__links" id="nav-links">
+        <li><a href="/">Home</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/projects.html">Projects</a></li>
+        <li><a href="/planner.html">Planner</a></li>
+        <li><a href="/contact.html">Contact</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false">
+          <span class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+          <span class="music-toggle__label">Music</span>
+        </button>
+
+        <button class="nav__menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+          <span class="burger" aria-hidden="true"><span></span><span></span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- ================================================================================
+         THE MESSAGE
+         It reuses the homepage hero's dark background and spotlight (the "hero" class),
+         and adds the "notfound" class for the few styles that belong to this page only.
+         hero__fade with a --delay makes each line fade up in turn, as on the homepage.
+         ================================================================================ -->
+    <section class="hero notfound" aria-labelledby="notfound-title">
+
+      <!-- SPOTLIGHT: the same decorative light as the homepage (see index.html). -->
+      <svg class="spotlight" aria-hidden="true" focusable="false" viewBox="0 0 3787 2842" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g filter="url(#spotlight-blur)">
+          <ellipse cx="1924.71" cy="273.501" rx="1924.71" ry="273.501" transform="matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)" fill="#DCE6F7" fill-opacity="0.21"></ellipse>
+        </g>
+        <defs>
+          <filter id="spotlight-blur" x="0.860352" y="0.838989" width="3785.16" height="2840.26" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend>
+            <feGaussianBlur stdDeviation="151" result="blurred"></feGaussianBlur>
+          </filter>
+        </defs>
+      </svg>
+
+      <div class="container notfound__inner">
+        <!-- The error code, large and quiet. aria-hidden because the heading below already
+             says what happened; a screen reader does not need to hear "four zero four". -->
+        <p class="notfound__code hero__fade" style="--delay: 0.1s" aria-hidden="true">404</p>
+
+        <h1 class="notfound__title hero__fade" id="notfound-title" style="--delay: 0.25s">Not on the lot yet.</h1>
+
+        <p class="notfound__text hero__fade" style="--delay: 0.4s">This page does not exist, or it is still being built. Head back to the homepage, or pick a page from the menu above.</p>
+
+        <div class="hero__actions hero__fade" style="--delay: 0.55s">
+          <a class="btn btn--primary" href="/">
+            Back to the homepage
+            <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER: the same footer as the homepage. -->
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div class="footer__about">
+        <p class="footer__brand">EOD</p>
+        <p>Emmanuel Osezele Dominic. Car dealer, car enthusiast, gamer, and B.Sc Computer Science student at Miva Open University.</p>
+      </div>
+
+      <nav class="footer__nav" aria-label="Footer">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about.html">About</a></li>
+          <li><a href="/projects.html">Projects</a></li>
+          <li><a href="/planner.html">Planner</a></li>
+          <li><a href="/contact.html">Contact</a></li>
+        </ul>
+      </nav>
+
+      <p class="footer__song">Soundtrack: "Celebration" by Joeboy. Use the Music button at the top to play or pause it.</p>
+    </div>
+
+    <div class="container">
+      <div class="footer__base">
+        <p>&copy; <span data-year>2026</span> Emmanuel Osezele Dominic. Built for COS 106, Introduction to Web Technologies.</p>
+        <p>Photos from <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a>.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- The shared script, also with a root-relative path. -->
+  <script src="/js/main.js"></script>
+</body>
+</html>

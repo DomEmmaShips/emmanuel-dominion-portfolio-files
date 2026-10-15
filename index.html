@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<!--
+  index.html : the HOMEPAGE of Emmanuel Osezele Dominic's COS 106 portfolio.
+
+  How this page is put together:
+    - All styling lives in css/style.css (one external stylesheet).
+    - All behaviour lives in js/main.js (one script, loaded at the end of <body>).
+    - The page is built from semantic elements: <header>, <nav>, <main>,
+      <section>, <footer>, <figure>, <table>, <dialog>, <audio>. Semantic
+      elements describe what each part IS, which helps screen readers,
+      search engines, and anyone reading the code.
+-->
+<html lang="en">
+<head>
+  <!-- CHARACTER SET: UTF-8 lets the page display any character correctly (accents, symbols). -->
+  <meta charset="UTF-8">
+
+  <!-- VIEWPORT: tells phones to use the real screen width instead of pretending to be a
+       desktop and zooming out. Without this line, responsive CSS would not kick in on mobile. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- TITLE AND DESCRIPTION: the title shows on the browser tab; the description is the
+       summary search engines show under the link. -->
+  <title>Emmanuel Osezele Dominic | Portfolio</title>
+  <meta name="description" content="Portfolio of Emmanuel Osezele Dominic: car dealer, car enthusiast, gamer, and B.Sc Computer Science student at Miva Open University.">
+
+  <!-- FAVICON: the small icon on the browser tab, drawn as an SVG so it stays sharp. -->
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+
+  <!-- GOOGLE FONTS: preconnect opens the connection to Google's font servers early, so the
+       fonts arrive sooner. Then we load two families:
+         Syncopate (wide, geometric) for the name and headings,
+         Space Mono (monospaced, like code) for body text and labels.
+       display=swap shows a fallback font immediately and swaps in the real one when it loads,
+       so text is never invisible while fonts download. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- THE EXTERNAL STYLESHEET: every page links to this same file, which keeps the colours,
+       fonts and spacing consistent across the whole site. -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<!-- The "page-home" class lets the CSS style anything that is unique to the homepage. -->
+<body class="page-home">
+
+  <!-- SKIP LINK: hidden until a keyboard user presses Tab. It lets them jump straight past
+       the navigation to the main content instead of tabbing through every link first. -->
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ==================================================================================
+       BACKGROUND MUSIC (multimedia requirement)
+       <audio> is HTML's built-in media element. loop restarts the song when it ends.
+       preload="none" means the browser downloads nothing until the visitor chooses to play,
+       so people who keep the music off do not waste data on a 2.5 MB file.
+       There are no visible controls here: the Music button in the nav controls it through
+       js/main.js. The <p> inside only shows in very old browsers that cannot play audio.
+       ================================================================================== -->
+  <audio id="bg-audio" src="audio/celebration.mp3" preload="none" loop>
+    <p>Your browser cannot play this audio. <a href="audio/celebration.mp3">Download "Celebration" by Joeboy</a>.</p>
+  </audio>
+
+  <!-- ==================================================================================
+       SITE HEADER AND NAVIGATION
+       Fixed to the top of the screen. It starts transparent over the dark hero; main.js adds
+       the class .is-scrolled once the page scrolls, and CSS fades in a solid background.
+       ================================================================================== -->
+  <header class="site-header" id="site-header">
+    <nav class="nav container" aria-label="Main">
+
+      <!-- BRAND: his initials as a wordmark, linking home. aria-label gives screen readers
+           the full name, because "EOD" on its own would be read out as letters. -->
+      <a class="nav__brand" href="index.html" aria-label="Emmanuel Osezele Dominic, home">EOD</a>
+
+      <!-- NAV LINKS: an unordered list, because a menu is a list of links.
+           aria-current="page" marks the page you are on, for screen readers and for CSS. -->
+      <ul class="nav__links" id="nav-links">
+        <li><a href="index.html" aria-current="page">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="planner.html">Planner</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <!-- MUSIC TOGGLE (on every page): a <button>, because it performs an action rather than
+             going somewhere. aria-pressed="false" marks it as an on/off toggle that is currently
+             off; main.js flips it to "true" while the song plays. The four <span>s are the bars
+             of the little equaliser icon. -->
+        <button class="music-toggle" id="music-toggle" type="button" aria-pressed="false">
+          <span class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+          <span class="music-toggle__label">Music</span>
+        </button>
+
+        <!-- MENU BUTTON (mobile only): shows and hides the links on small screens.
+             aria-controls names the list it opens; aria-expanded says whether it is open. -->
+        <button class="nav__menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Open menu">
+          <span class="burger" aria-hidden="true"><span></span><span></span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- <main> holds the content unique to this page. id="main" is where the skip link lands. -->
+  <main id="main">
+
+    <!-- ================================================================================
+         1. HERO
+         The first screen: name, photograph, welcome message.
+         aria-labelledby connects the section to its heading, so screen readers announce
+         "Emmanuel Osezele Dominic, region" when entering it.
+         ================================================================================ -->
+    <section class="hero" aria-labelledby="hero-name">
+
+      <!-- SPOTLIGHT (ported from Aceternity's "Spotlight" on 21st.dev).
+           A huge blurred ellipse drawn in SVG. CSS slides and fades it in once, like a
+           showroom light switching on. aria-hidden="true" hides it from screen readers,
+           because it is pure decoration. -->
+      <svg class="spotlight" aria-hidden="true" focusable="false" viewBox="0 0 3787 2842" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g filter="url(#spotlight-blur)">
+          <ellipse cx="1924.71" cy="273.501" rx="1924.71" ry="273.501" transform="matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)" fill="#DCE6F7" fill-opacity="0.21"></ellipse>
+        </g>
+        <defs>
+          <!-- The filter softens the ellipse's edges into a beam of light (feGaussianBlur). -->
+          <filter id="spotlight-blur" x="0.860352" y="0.838989" width="3785.16" height="2840.26" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend>
+            <feGaussianBlur stdDeviation="151" result="blurred"></feGaussianBlur>
+          </filter>
+        </defs>
+      </svg>
+
+      <div class="hero__inner container">
+
+        <!-- HERO TEXT. It comes first in the HTML so screen readers meet the name first,
+             even though CSS places the photo on the left on wide screens. -->
+        <div class="hero__copy">
+          <!-- WELCOME MESSAGE: a short greeting above the name. The --delay values are the only
+               inline styles on the page: each sets a CSS variable that staggers the entrance. -->
+          <p class="hero__welcome hero__fade" style="--delay: 0.15s">Welcome to my portfolio.</p>
+
+          <!-- THE NAME: the page's single <h1>. Each line sits in a .line wrapper that hides
+               anything outside it (overflow: hidden), so the text can rise up into view from
+               below its own line, like a sign being raised. -->
+          <h1 class="hero__name" id="hero-name">
+            <span class="line"><span class="line__inner" style="--delay: 0.3s">Emmanuel</span></span>
+            <span class="line"><span class="line__inner" style="--delay: 0.42s"><span class="hero__middle">Osezele</span> Dominic</span></span>
+          </h1>
+
+          <!-- WORD ROTATE (ported from Magic UI's "Word Rotate" on 21st.dev).
+               main.js reads the words from data-words, splits them on "|" into an array, and
+               swaps them every 2.5 seconds. The rotating part is aria-hidden so screen readers
+               do not hear it change over and over; they read the .sr-only sentence instead,
+               which lists every role at once. -->
+          <p class="hero__role hero__fade" style="--delay: 0.6s">
+            <span class="sr-only">I am a car dealer, a Computer Science student, a car enthusiast and a gamer.</span>
+            <span aria-hidden="true">I am a <span class="word-rotate" data-words="car dealer.|Computer Science student.|car enthusiast.|gamer."><span class="word-rotate__word">car dealer.</span></span></span>
+          </p>
+
+          <p class="hero__intro hero__fade" style="--delay: 0.72s">I sell cars through my own auto business, and I am studying Computer Science at Miva Open University to build software that helps businesses grow.</p>
+
+          <!-- CALLS TO ACTION: one strong button and one quieter text link, so the visitor can
+               tell at a glance which step matters most. Both use the same small SVG arrow.
+               In the text link, only the words sit in a <span>, so the underline runs under
+               the words and not under the arrow. -->
+          <div class="hero__actions hero__fade" style="--delay: 0.84s">
+            <a class="btn btn--primary" href="about.html">
+              About me
+              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a class="link-arrow" href="projects.html">
+              <span>See my projects</span>
+              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- THE PHOTOGRAPH, inside a <figure>. The photo's background has been removed
+             (transparent pixels), so the "studio" lighting behind him is drawn by CSS and
+             matches the site's colours. <picture> offers the browser two versions: it takes
+             the WebP (a much smaller file) if it understands WebP, otherwise the PNG. Both
+             formats keep the transparency; a JPEG could not.
+             width/height reserve the right space before the image loads, so nothing jumps.
+             fetchpriority="high" asks the browser to download this image early, because it
+             is the most important picture on the page. -->
+        <figure class="hero__portrait hero__photo-in">
+          <div class="shine-frame">
+            <picture>
+              <source srcset="images/emmanuel-studio.webp" type="image/webp">
+              <img src="images/emmanuel-studio.png" alt="Emmanuel Osezele Dominic in a charcoal three-piece suit and navy tie" width="755" height="944" fetchpriority="high">
+            </picture>
+
+            <!-- SHINE BORDER (ported from Magic UI's "Shine Border" on 21st.dev).
+                 A thin ring around the photo with a band of light travelling along it, like
+                 light moving across chrome trim. Decoration only, so aria-hidden. -->
+            <span class="shine-border" aria-hidden="true"><span class="shine-border__light"></span></span>
+          </div>
+          <figcaption class="hero__caption">
+            <span>B.Sc Computer Science</span>
+            <span>100 Level</span>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ================================================================================
+         2. FACTS STRIP
+         A blue band listing Emmanuel's four roles (CS is short for Computer Science).
+         It is aria-hidden (hidden from screen readers) because the same roles are read
+         out in the hero just above, so they would otherwise hear everything twice.
+         ================================================================================ -->
+    <div class="facts-strip" aria-hidden="true">
+      <ul class="facts-strip__list container">
+        <li>Car dealer</li>
+        <li>CS student</li>
+        <li>Car enthusiast</li>
+        <li>Gamer</li>
+      </ul>
+    </div>
+
+    <!-- ================================================================================
+         3. BRIEF BIOGRAPHY + SPEC SHEET
+         A light (silver) section. Left: a short biography. Right: a real HTML <table>,
+         styled like the spec sheet you would find on a car in a showroom.
+         .reveal makes each block fade up when it scrolls into view (see main.js, part 4).
+         ================================================================================ -->
+    <section class="bio section section--silver" aria-labelledby="bio-title">
+      <div class="container bio__grid">
+
+        <div class="bio__text reveal">
+          <h2 class="section-title" id="bio-title">Cars by trade, code by choice.</h2>
+          <p>I am Emmanuel Osezele Dominic. I am from Edo State, and I have lived in both Edo and Lagos.</p>
+          <p>By trade I am a car dealer. I run an auto business that sells cars, and I am now working on opening a large car dealership. Alongside the business, I am a 100 level B.Sc Computer Science student at Miva Open University.</p>
+          <p>Running the business has given me real business knowledge. Computer Science is how I plan to turn that knowledge into software, for my own business and for others.</p>
+        </div>
+
+        <!-- SPEC SHEET TABLE (tables requirement).
+             <caption> is the table's title. Each row has a <th scope="row">, which tells
+             screen readers that cell is the label for the rest of its row. -->
+        <div class="bio__spec reveal" style="--delay: 0.12s">
+          <table class="spec-table">
+            <caption>Spec sheet</caption>
+            <tbody>
+              <tr><th scope="row">Full name</th><td>Emmanuel Osezele Dominic</td></tr>
+              <tr><th scope="row">Home state</th><td>Edo</td></tr>
+              <tr><th scope="row">Has lived in</th><td>Edo, Lagos</td></tr>
+              <tr><th scope="row">Studying</th><td>B.Sc Computer Science</td></tr>
+              <tr><th scope="row">Level</th><td>100</td></tr>
+              <tr><th scope="row">University</th><td>Miva Open University</td></tr>
+              <tr><th scope="row">Trade</th><td>Car sales</td></tr>
+              <tr><th scope="row">Off the clock</th><td>Cars and gaming</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================================
+         4. TWO LANES: CAREER ASPIRATIONS
+         A dark section. Two "lanes" side by side, the business and the code, separated by a
+         dashed line like the marking down the middle of a road. Each lane is an <article>
+         because it is a self-contained piece of content with its own heading.
+         ================================================================================ -->
+    <section class="lanes section section--dark" aria-labelledby="lanes-title">
+      <div class="container">
+        <header class="lanes__head reveal">
+          <h2 class="section-title" id="lanes-title">Two lanes, one road.</h2>
+          <p class="lanes__lead">Where I am headed, in business and in tech.</p>
+        </header>
+
+        <div class="lanes__grid">
+          <article class="lane reveal">
+            <!-- loading="lazy" waits to download this photo until it is close to the screen. -->
+            <img class="lane__img" src="images/lane-dealership.webp" alt="Rows of new cars on a bright, white showroom floor" width="1600" height="1068" loading="lazy">
+            <div class="lane__body">
+              <h3 class="lane__title">The business</h3>
+              <p>Grow my auto business and open a large car dealership. That work is already under way.</p>
+            </div>
+          </article>
+
+          <!-- THE ROAD MARKING: an empty element that CSS draws as a dashed line. -->
+          <div class="lanes__divider" aria-hidden="true"></div>
+
+          <article class="lane lane--offset reveal" style="--delay: 0.12s">
+            <img class="lane__img" src="images/lane-code.webp" alt="A laptop showing lines of code, lit in deep blue" width="1600" height="1067" loading="lazy">
+            <div class="lane__body">
+              <h3 class="lane__title">The code</h3>
+              <p>Learn to build and shape software that helps my own business, and other businesses, run better.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================================
+         5. EXPLORE: BENTO GRID OF THE OTHER PAGES
+         (ported from Magic UI's "Bento Grid" and "Magic Card" on 21st.dev)
+         Each tile is one big link. CSS Grid arranges them in a mosaic of different sizes.
+         The empty .bento-card__glow span is the soft light that follows the mouse (main.js, part 7).
+         ================================================================================ -->
+    <section class="explore section section--silver" aria-labelledby="explore-title">
+      <div class="container">
+        <h2 class="section-title reveal" id="explore-title">Take a look around.</h2>
+
+        <div class="bento">
+          <a class="bento-card bento-card--about reveal" href="about.html">
+            <img class="bento-card__img" src="images/tile-gaming.webp" alt="" width="1100" height="733" loading="lazy">
+            <span class="bento-card__glow" aria-hidden="true"></span>
+            <span class="bento-card__content">
+              <span class="bento-card__title">About me</span>
+              <span class="bento-card__text">My education, where I am headed, the skills I am building, and what I do off the clock.</span>
+              <span class="bento-card__cta">Open About <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </span>
+          </a>
+
+          <a class="bento-card bento-card--projects reveal" href="projects.html" style="--delay: 0.08s">
+            <img class="bento-card__img" src="images/tile-headlight.webp" alt="" width="1100" height="1650" loading="lazy">
+            <span class="bento-card__glow" aria-hidden="true"></span>
+            <span class="bento-card__content">
+              <span class="bento-card__title">Projects</span>
+              <span class="bento-card__text">Concept builds I am planning as I learn to code.</span>
+              <span class="bento-card__cta">Open Projects <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </span>
+          </a>
+
+          <a class="bento-card bento-card--planner reveal" href="planner.html" style="--delay: 0.16s">
+            <img class="bento-card__img" src="images/tile-notebook.webp" alt="" width="1100" height="733" loading="lazy">
+            <span class="bento-card__glow" aria-hidden="true"></span>
+            <span class="bento-card__content">
+              <span class="bento-card__title">Academic planner</span>
+              <span class="bento-card__text">My study tasks: add one, tick it off, clear it away.</span>
+              <span class="bento-card__cta">Open Planner <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </span>
+          </a>
+
+          <a class="bento-card bento-card--contact reveal" href="contact.html" style="--delay: 0.24s">
+            <span class="bento-card__glow" aria-hidden="true"></span>
+            <span class="bento-card__content">
+              <span class="bento-card__title">Contact</span>
+              <span class="bento-card__text">Send me a message about cars, code, or anything in between.</span>
+              <span class="bento-card__cta">Open Contact <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" width="16" height="16"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================================================================================
+       FOOTER
+       Repeats the page links (handy at the bottom of a long page), credits the song and the
+       photos, and shows the year, which main.js fills in from the computer's clock.
+       ================================================================================== -->
+  <footer class="site-footer">
+    <div class="container footer__grid">
+      <div class="footer__about">
+        <p class="footer__brand">EOD</p>
+        <p>Emmanuel Osezele Dominic. Car dealer, car enthusiast, gamer, and B.Sc Computer Science student at Miva Open University.</p>
+      </div>
+
+      <nav class="footer__nav" aria-label="Footer">
+        <ul>
+          <li><a href="index.html" aria-current="page">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="planner.html">Planner</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+
+      <p class="footer__song">Soundtrack: "Celebration" by Joeboy. Use the Music button at the top to play or pause it.</p>
+    </div>
+
+    <div class="container">
+      <div class="footer__base">
+        <p>&copy; <span data-year>2026</span> Emmanuel Osezele Dominic. Built for COS 106, Introduction to Web Technologies.</p>
+        <p>Photos from <a href="https://www.pexels.com" target="_blank" rel="noopener">Pexels</a>.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==================================================================================
+       MUSIC POPUP (homepage only)
+       <dialog> is HTML's built-in popup element. It stays hidden until main.js calls
+       showModal(), which it does only once per browser session. aria-labelledby and
+       aria-describedby tell screen readers the popup's title and explanation.
+       ================================================================================== -->
+  <dialog class="modal music-dialog" id="music-dialog" aria-labelledby="music-dialog-title" aria-describedby="music-dialog-text">
+    <span class="eq eq--large is-demo" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+    <h2 class="music-dialog__title" id="music-dialog-title">This site has a soundtrack</h2>
+    <p class="music-dialog__text" id="music-dialog-text">"Celebration" by Joeboy can play in the background while you look around. You can pause it at any time with the Music button at the top of every page.</p>
+    <!-- autofocus on "Keep it off": when the popup opens, keyboard focus lands on the SAFE
+         choice. Someone pressing Enter or Space out of habit then keeps the page quiet,
+         instead of being surprised by sound they did not ask for. -->
+    <div class="music-dialog__actions">
+      <button class="btn btn--primary" type="button" data-music-choice="on">Play the music</button>
+      <button class="btn btn--ghost" type="button" data-music-choice="off" autofocus>Keep it off</button>
+    </div>
+  </dialog>
+
+  <!-- THE SCRIPT: loaded last, so every element above already exists when it runs. -->
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,3028 @@
+/* ==========================================================================
+   style.css : the ONE external stylesheet for every page of the site.
+
+   Every HTML page links to this file with
+     <link rel="stylesheet" href="css/style.css">
+   so a change made here updates the whole site at once.
+
+   The design idea: a car showroom. Dark graphite sections are the showroom
+   floor at night, light brushed-silver sections are the chrome, and one blue
+   (picked to match the navy tie in Emmanuel's photo) marks anything you can
+   click. The page alternates dark and light sections, which is the "blend of
+   dark and light" that was asked for.
+
+   Contents
+     1.  Design tokens (CSS custom properties in :root)
+     2.  Reset and base styles
+     3.  Layout helpers (container, sections, screen-reader text, skip link)
+     4.  Buttons and links
+     5.  Header and navigation
+     6.  Music toggle and equaliser icon
+     7.  Hero (spotlight, name, word rotate, portrait, shine border)
+     8.  Facts strip
+     9.  Biography and spec table
+     10. Two lanes (career aspirations)
+     11. Explore bento grid
+     12. Footer
+     13. Popups (dialog)
+     14. Scroll reveal
+     15. Keyframe animations
+     16. Responsive: tablet (max-width 1024px)
+     17. Responsive: mobile (max-width 768px)
+     18. Reduced motion
+     19. 404 page
+     20. Inner pages: shared pieces (page hero, panels, chips, pills, forms, CTA band)
+     21. About page
+     22. Projects page
+     23. Academic planner page
+     24. Contact page
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. DESIGN TOKENS
+   :root is the top of the page, so variables declared here can be used
+   anywhere with var(--name). Defining every colour and font ONCE means the
+   whole site stays consistent, and changing the blue, for example, is a
+   one-line edit instead of a hunt through hundreds of lines.
+   ========================================================================== */
+:root {
+  /* COLOURS: dark showroom tones */
+  --color-ink: #0F1013;            /* deepest background (hero, footer) */
+  --color-graphite: #18181B;       /* dark sections */
+  --color-graphite-raised: #27272A;/* slightly lighter dark surface (the dark panels on the About page) */
+  --color-chrome: #A1A1AA;         /* quieter text on dark backgrounds */
+
+  /* COLOURS: silver tones */
+  --color-silver: #E8ECF0;         /* light section background, main text on dark */
+  --color-silver-deep: #D4D8DE;    /* lines on silver */
+  --color-paper: #FAFAFA;          /* brightest white, headings on dark */
+  --color-text-dark: #18181B;      /* main text on silver */
+  --color-text-muted: #52525B;     /* quieter text on silver */
+
+  /* COLOURS: the one accent. Each shade is chosen for the background it sits on,
+     so text always keeps a contrast ratio of at least 4.5 to 1 (the WCAG minimum). */
+  --color-blue: #2563EB;           /* button fills (white text on it reads clearly) */
+  --color-blue-deep: #1D4ED8;      /* blue text and outlines on silver, button hover */
+  --color-blue-bright: #60A5FA;    /* blue text and lines on dark backgrounds */
+
+  /* FORM COLOURS: input borders need 3:1 contrast against white so people can
+     see where a box is (#86868F gives 3.6:1); error text needs 4.5:1 (#B91C1C gives 6.5:1). */
+  --color-field-border: #86868F;
+  --color-danger: #B91C1C;
+
+  /* Thin divider lines: white or black at low opacity, so they suit any background shade. */
+  --color-hairline-dark: rgba(232, 236, 240, 0.12);
+  --color-hairline-light: rgba(24, 24, 27, 0.12);
+
+  /* FONTS: each list ends with fallbacks the browser uses while Google Fonts load. */
+  --font-display: 'Syncopate', 'Arial Black', sans-serif;
+  --font-body: 'Space Mono', 'Courier New', monospace;
+
+  /* TYPE SIZES WITH clamp(MIN, PREFERRED, MAX):
+     the preferred value uses vw (1vw = 1% of the screen width), so headings
+     grow on big screens and shrink on phones, but never past the min or max. */
+  --text-hero: clamp(2.1rem, 0.6rem + 4.9vw, 5.25rem);
+  --text-h2: clamp(1.55rem, 1rem + 2.3vw, 3rem);
+  --text-h3: clamp(1.05rem, 0.95rem + 0.55vw, 1.375rem);
+
+  /* SPACING */
+  --gutter: clamp(1rem, 0.4rem + 2.6vw, 2.5rem);          /* space at the left and right edges */
+  --space-section: clamp(4.5rem, 2.5rem + 7vw, 9rem);     /* space above and below each section */
+  --nav-height: 72px;
+  --radius: 6px;
+  --radius-lg: 12px;
+
+  /* MOTION: two easing curves and two durations, reused by every animation.
+     --ease-out starts fast and settles gently, which feels responsive.
+     --ease-in-out speeds up then slows down, for things moving across the screen. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --duration-fast: 160ms;
+  --duration-ui: 250ms;
+}
+
+
+/* ==========================================================================
+   2. RESET AND BASE STYLES
+   Browsers add their own default margins and sizes. These rules even them
+   out so the site looks the same in Chrome, Safari, Firefox and Edge.
+   ========================================================================== */
+
+/* BOX SIZING: makes width include padding and border. Without it, a 300px box
+   with 20px padding would actually take up 340px, which makes layouts fiddly. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* SMOOTH SCROLLING for in-page links (like the skip link).
+   text-size-adjust stops phones from enlarging text on their own when rotated. */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 1rem;           /* 16px, the comfortable reading size on any screen */
+  line-height: 1.7;          /* generous line spacing suits a monospaced font */
+  color: var(--color-silver);
+  background-color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Stops the page scrolling while the mobile menu is open (class added by main.js). */
+body.is-locked {
+  overflow: hidden;
+}
+
+/* Images and SVGs behave like blocks and never overflow their container. */
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+}
+
+/* Remove default spacing so every gap on the page is one we chose on purpose. */
+h1, h2, h3, p, figure, ul {
+  margin: 0;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: inherit;
+}
+
+/* Buttons do not inherit fonts by default, which would make them look out of place. */
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* FOCUS RING: a clear outline for keyboard users. :focus-visible only shows it
+   when the keyboard is being used, so mouse clicks do not leave outlines behind. */
+:focus-visible {
+  outline: 2px solid var(--color-blue-bright);
+  outline-offset: 3px;
+}
+
+/* Highlighted (selected) text uses the brand blue. */
+::selection {
+  background: var(--color-blue);
+  color: #fff;
+}
+
+
+/* ==========================================================================
+   3. LAYOUT HELPERS
+   ========================================================================== */
+
+/* CONTAINER: centres content and stops lines getting too long on wide screens.
+   margin-inline: auto splits the leftover space equally on both sides. */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* SECTIONS: the same top and bottom spacing everywhere gives the page a steady rhythm. */
+.section {
+  padding-block: var(--space-section);
+}
+
+.section--dark {
+  background-color: var(--color-graphite);
+  color: var(--color-silver);
+}
+
+/* BRUSHED SILVER: two background layers on top of the silver colour.
+   1. A soft white wash fading down from the top, like light catching metal.
+   2. repeating-linear-gradient draws hairline stripes every 4px, which reads
+      as the fine grain of brushed metal. They are faint, so text stays crisp. */
+.section--silver {
+  background-color: var(--color-silver);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 45%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.24) 0 1px, rgba(24, 24, 27, 0.02) 1px 2px, transparent 2px 4px);
+  color: var(--color-text-dark);
+}
+
+/* SECTION HEADINGS: the wide display font in capitals, tightened slightly
+   because Syncopate is very wide. text-wrap: balance evens out line lengths. */
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-h2);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.section--dark .section-title {
+  color: var(--color-paper);
+}
+
+/* SCREEN-READER-ONLY TEXT: hidden from sight but still read aloud.
+   (display: none would hide it from screen readers too.) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* SKIP LINK: parked above the screen until it receives keyboard focus,
+   then it slides into view at the top left. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius);
+  background: var(--color-blue);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--duration-ui) var(--ease-out);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+
+/* ==========================================================================
+   4. BUTTONS AND LINKS
+   ========================================================================== */
+
+/* BASE BUTTON: inline-flex lines the text and icon up side by side and
+   centres them vertically. min-height 48px keeps it easy to tap on a phone.
+   The transition lists the exact properties that may animate (never "all"),
+   so the browser only does the work it needs to. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding: 0.75rem 1.4rem;
+  border: 1px solid transparent;
+  border-radius: 999px;          /* a huge radius turns the ends into full semicircles (a "pill") */
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+/* PRESS FEEDBACK: shrink to 97% while pressed, so the button feels physical. */
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn--primary {
+  background-color: var(--color-blue);
+  color: #fff;
+}
+
+.btn--ghost {
+  background-color: transparent;
+  border-color: rgba(232, 236, 240, 0.28);
+  color: var(--color-paper);
+}
+
+.btn .icon {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+/* HOVER STYLES live inside this media query: "hover: hover" and "pointer: fine"
+   mean a real mouse or trackpad. Phones fire fake hovers on tap, which would
+   leave buttons stuck in their hover look, so we only hover where hovering exists. */
+@media (hover: hover) and (pointer: fine) {
+  .btn--primary:hover {
+    background-color: var(--color-blue-deep);
+  }
+
+  .btn--primary:hover .icon {
+    transform: translateX(3px);
+  }
+
+  .btn--ghost:hover {
+    border-color: var(--color-silver);
+  }
+}
+
+/* UNDERLINED ARROW LINK: the quieter, secondary action. The link itself has
+   no underline; only the <span> holding the words gets one, so the line runs
+   under the text and stops before the SVG arrow. */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--color-paper);
+  text-decoration: none;
+}
+
+.link-arrow span {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(232, 236, 240, 0.4);
+  text-underline-offset: 0.35em;
+  transition: text-decoration-color var(--duration-fast) ease;
+}
+
+.link-arrow .icon {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link-arrow:hover span {
+    text-decoration-color: var(--color-blue-bright);
+  }
+
+  .link-arrow:hover .icon {
+    transform: translateX(4px);
+  }
+}
+
+
+/* ==========================================================================
+   5. HEADER AND NAVIGATION
+   ========================================================================== */
+
+/* FIXED HEADER: position: fixed pins it to the top of the screen while the
+   page scrolls underneath. inset: 0 0 auto 0 means top 0, right 0, left 0. */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--nav-height);
+}
+
+/* THE BACKGROUND THAT APPEARS ON SCROLL: drawn on a ::before layer that sits
+   behind the links. It starts invisible (opacity 0). When main.js adds
+   .is-scrolled, opacity transitions to 1. Fading opacity is smoother than
+   fading background-color, because opacity can be animated on the graphics card.
+   backdrop-filter blurs whatever scrolls behind the bar, like frosted glass. */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 16, 19, 0.86);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--color-hairline-dark);
+  opacity: 0;
+  transition: opacity var(--duration-ui) var(--ease-out);
+}
+
+.site-header.is-scrolled::before,
+.site-header.is-menu-open::before {
+  opacity: 1;
+}
+
+/* FLEXBOX ROW: puts the brand, links and buttons side by side.
+   justify-content: space-between pushes the brand to the left edge and the
+   rest to the right. align-items: center lines them up vertically. */
+.nav {
+  position: relative;  /* sits above the ::before background */
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.nav__brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.125rem;
+  letter-spacing: 0.18em;
+  text-decoration: none;
+  color: var(--color-paper);
+}
+
+/* margin-left: auto on a flex item soaks up all spare space to its left,
+   pushing the links over towards the buttons. */
+.nav__links {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.nav__links a {
+  display: block;
+  padding: 0.5rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  text-decoration: none;
+  color: var(--color-chrome);
+  transition: color var(--duration-fast) ease, background-color var(--duration-fast) ease;
+}
+
+/* The current page gets brighter text and a faint pill behind it. */
+.nav__links a[aria-current="page"] {
+  color: var(--color-paper);
+  background-color: rgba(232, 236, 240, 0.08);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav__links a:hover {
+    color: var(--color-paper);
+  }
+}
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* The menu button only appears on mobile (see section 17). */
+.nav__menu-btn {
+  display: none;
+}
+
+
+/* ==========================================================================
+   6. MUSIC TOGGLE AND EQUALISER ICON
+   ========================================================================== */
+.music-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  padding: 0.45rem 0.95rem;
+  border: 1px solid rgba(232, 236, 240, 0.22);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-chrome);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.music-toggle:active {
+  transform: scale(0.97);
+}
+
+/* ATTRIBUTE SELECTOR: [aria-pressed="true"] matches the button only while
+   main.js says the music is playing, so the "on" look follows the real state. */
+.music-toggle[aria-pressed="true"] {
+  color: var(--color-paper);
+  border-color: var(--color-blue-bright);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .music-toggle:hover {
+    color: var(--color-paper);
+    border-color: var(--color-silver);
+  }
+}
+
+/* EQUALISER: four thin bars in a row, aligned to the bottom.
+   Each bar is scaled down to 30% height with transform: scaleY().
+   transform-origin: bottom makes them grow upwards from their base. */
+.eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+
+.eq span {
+  width: 3px;
+  height: 100%;
+  border-radius: 1px;
+  background-color: currentColor;  /* takes the text colour of the button */
+  transform-origin: bottom;
+  transform: scaleY(0.3);
+}
+
+/* Give the resting bars slightly different heights so they look like an equaliser. */
+.eq span:nth-child(2) { transform: scaleY(0.55); }
+.eq span:nth-child(3) { transform: scaleY(0.4); }
+.eq span:nth-child(4) { transform: scaleY(0.65); }
+
+/* While music plays (or in the popup's demo icon) the bars rise and fall.
+   Negative delays start each bar part-way through the loop, so they move out of step. */
+.music-toggle.is-playing .eq span,
+.eq.is-demo span {
+  animation: eq-level 900ms ease-in-out infinite alternate;
+}
+
+.music-toggle.is-playing .eq span:nth-child(2),
+.eq.is-demo span:nth-child(2) { animation-duration: 700ms; animation-delay: -300ms; }
+
+.music-toggle.is-playing .eq span:nth-child(3),
+.eq.is-demo span:nth-child(3) { animation-duration: 1000ms; animation-delay: -600ms; }
+
+.music-toggle.is-playing .eq span:nth-child(4),
+.eq.is-demo span:nth-child(4) { animation-duration: 800ms; animation-delay: -150ms; }
+
+.eq--large {
+  height: 28px;
+  gap: 4px;
+  color: var(--color-blue-bright);
+}
+
+.eq--large span {
+  width: 5px;
+  border-radius: 2px;
+}
+
+
+/* ==========================================================================
+   7. HERO
+   ========================================================================== */
+
+/* THE HERO SECTION fills the screen (100svh = 100% of the small viewport
+   height, which stays correct on phones whose address bar slides in and out).
+   overflow: hidden trims the huge spotlight so it cannot cause sideways scrolling.
+   isolation: isolate starts a fresh stacking layer, so the z-index values
+   inside the hero cannot clash with the rest of the page. */
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding-top: calc(var(--nav-height) + 2.5rem);
+  padding-bottom: 4rem;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(120% 80% at 30% 0%, #1C1D22 0%, var(--color-ink) 62%);
+}
+
+/* SPOTLIGHT (Aceternity port). Positioned far up and to the left, then the
+   "spotlight" keyframes (section 15) slide it into place while fading it in.
+   It starts at opacity 0; "forwards" keeps the final frame after it finishes. */
+.spotlight {
+  position: absolute;
+  z-index: 0;
+  top: -5rem;
+  left: 15rem;
+  width: 84%;
+  height: 169%;
+  opacity: 0;
+  pointer-events: none;   /* clicks pass straight through it */
+  animation: spotlight 2s var(--ease-out) 0.75s 1 forwards;
+}
+
+/* CSS GRID, TWO COLUMNS: "auto" makes the first column exactly as wide as
+   the photo inside it; minmax(0, 1fr) gives the text column all the space
+   that is left. So however the photo is sized, the text sits a steady gap
+   away from it instead of drifting off to the right. */
+.hero__inner {
+  position: relative;
+  z-index: 1;   /* above the spotlight */
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+
+.hero__copy {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/* "Welcome to my portfolio.": a plain sentence in blue, the first thing a
+   visitor reads, set just above the name. */
+.hero__welcome {
+  font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.0625rem);
+  color: var(--color-blue-bright);
+}
+
+/* THE NAME: the biggest text on the page. */
+.hero__name {
+  margin-block: 1.1rem 1.6rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-hero);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+/* MASKED LINES: each .line hides anything that sticks out of it. The text
+   inside (.line__inner) starts pushed 105% down, out of sight, and the
+   "rise" animation slides it up into place. The --delay variable set in
+   the HTML staggers the two lines so they arrive one after the other. */
+.line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+
+.line__inner {
+  display: inline-block;
+  transform: translateY(105%);
+  animation: rise 1s var(--ease-out) var(--delay, 0s) forwards;
+}
+
+/* The middle name sits small, in the body font, above "Dominic". */
+.hero__middle {
+  display: block;
+  margin-bottom: 0.7em;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(0.75rem, 0.65rem + 0.35vw, 0.95rem);
+  letter-spacing: 0.45em;
+  color: var(--color-chrome);
+}
+
+/* FADE-UP ENTRANCE for the smaller hero pieces: start invisible and 12px low,
+   then "fade-up" brings them into place, each after its own --delay. */
+.hero__fade {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fade-up 0.8s var(--ease-out) var(--delay, 0s) forwards;
+}
+
+.hero__role {
+  font-size: clamp(1rem, 0.92rem + 0.45vw, 1.25rem);
+  line-height: 1.5;
+  color: var(--color-paper);
+}
+
+/* WORD ROTATE (Magic UI port). inline-block lets the word move up and down;
+   overflow: hidden clips it while it slides, so it appears to drop in and
+   out of a slot. vertical-align: bottom keeps it on the same baseline. */
+.word-rotate {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-block: 0.08em;
+  color: var(--color-blue-bright);
+}
+
+.word-rotate__word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.hero__intro {
+  max-width: 46ch;    /* "ch" is the width of one character, so this caps lines at about 46 characters */
+  margin-top: 1rem;
+  color: var(--color-chrome);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;    /* lets the link drop below the button if space runs out */
+  align-items: center;
+  gap: 0.75rem 1.75rem;
+  margin-top: 2.25rem;
+}
+
+/* THE PORTRAIT: column 1, row 1 (beside the text).
+   min() picks the smallest of three widths:
+     32vw   about a third of the screen width,
+     460px  a sensible maximum on very wide screens,
+     the height-based value, which keeps the whole 4:5 photo visible on
+     short laptop screens (the photo's height is its width divided by 0.8). */
+.hero__portrait {
+  grid-column: 1;
+  grid-row: 1;
+  width: min(32vw, 460px, calc((100svh - var(--nav-height) - 10rem) * 0.8));
+}
+
+/* THE FRAME, a little photo studio: aspect-ratio keeps it 4 wide by 5 tall
+   at any width, and overflow: hidden crops everything to the rounded corners.
+   The photo has a transparent background, so what shows behind him is this
+   radial gradient: a pool of soft grey light high up behind his shoulders,
+   falling away to graphite at the edges, like a studio backdrop under a lamp. */
+.shine-frame {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(75% 55% at 50% 22%, #4B4E57 0%, #2C2E34 45%, var(--color-graphite) 100%);
+  box-shadow: 0 40px 80px -32px rgba(0, 0, 0, 0.75);
+}
+
+/* object-fit: cover fills the frame without stretching (it would crop if
+   the shapes differed; here the photo is already 4:5, so nothing is lost). */
+.shine-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* FLOOR FADE: a gradient over the bottom third of the frame, from solid
+   graphite up to transparent. The photo is cut off at the waist, and this
+   lets him fade into the dark instead of ending at a hard line. */
+.shine-frame::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;   /* stretch along the bottom edge */
+  height: 32%;
+  background: linear-gradient(to top, var(--color-graphite) 6%, rgba(24, 24, 27, 0));
+  pointer-events: none;
+}
+
+/* PORTRAIT ENTRANCE: the photo fades in while easing from 106% size down to
+   100%, like a camera settling. */
+.hero__photo-in img {
+  animation: settle 1.4s var(--ease-out) 0.1s both;
+}
+
+/* SHINE BORDER (Magic UI port).
+   A layer the same size as the frame, with 2px of padding.
+   The MASK keeps only the 2px ring around the edge: the first mask layer
+   covers the content box (inside the padding), the second covers the whole
+   box, and mask-composite: exclude keeps only where they do NOT overlap,
+   which is the padding ring. -webkit- versions are for Safari. */
+.shine-border {
+  position: absolute;
+  inset: 0;
+  z-index: 1;   /* above the floor fade, so the ring stays visible all the way round */
+  padding: 2px;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: rgba(232, 236, 240, 0.16);   /* faint steady edge underneath the moving light */
+  -webkit-mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+  -webkit-mask-clip: content-box, border-box;
+  -webkit-mask-composite: xor;
+  mask-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0);
+  mask-clip: content-box, border-box;
+  mask-composite: exclude;
+}
+
+/* THE MOVING LIGHT: a layer three times the frame's size holding a thin ring
+   of blue and white light (a radial gradient: transparent, then a narrow
+   band of colour between 40% and 60%, then transparent again). Sliding the
+   layer diagonally makes that band sweep along the visible edge.
+   The original component moved background-position; we move the layer with
+   transform instead, which the graphics card can do without repainting.
+   -66.667% of 300% equals the same 200% shift the original made. */
+.shine-border__light {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300%;
+  height: 300%;
+  background-image: radial-gradient(transparent 40%, var(--color-blue-bright) 47%, var(--color-paper) 50%, var(--color-blue-bright) 53%, transparent 60%);
+  animation: shine 14s linear infinite;
+}
+
+/* The two short labels under the photo. */
+.hero__caption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.9rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-chrome);
+}
+
+
+/* ==========================================================================
+   8. FACTS STRIP
+   ========================================================================== */
+
+/* THE BAND: a blue strip, like a racing stripe between the dark hero and the
+   silver section, listing a few facts about Emmanuel. It holds still: the
+   words are short, so there is no need to move them to fit them in. */
+.facts-strip {
+  padding-block: 1.1rem;
+  background-color: var(--color-blue);
+  color: #fff;
+}
+
+/* FLEX ROW THAT WRAPS: the items sit side by side, centred. flex-wrap: wrap
+   lets them flow onto a second line on narrow screens instead of overflowing.
+   The gap has two values: space between lines, then space between items. */
+.facts-strip__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem 2.5rem;
+}
+
+.facts-strip__list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;   /* keep each fact on one line */
+}
+
+/* A small diamond before each item: a 6px square rotated 45 degrees. */
+.facts-strip__list li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background-color: currentColor;
+  opacity: 0.6;
+  transform: rotate(45deg);
+}
+
+
+/* ==========================================================================
+   9. BIOGRAPHY AND SPEC TABLE
+   ========================================================================== */
+
+/* TWO-COLUMN GRID: text on the left (slightly wider: 1.1fr), table on the right.
+   "fr" means a fraction of the free space. */
+.bio__grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: clamp(2.5rem, 6vw, 6rem);
+  align-items: start;
+}
+
+.bio__text p {
+  max-width: 54ch;
+  margin-top: 1.25rem;
+  color: var(--color-text-muted);
+}
+
+/* The first paragraph is the lead: a little larger and darker. */
+.bio__text .section-title + p {
+  margin-top: 1.75rem;
+  font-size: 1.125rem;
+  color: var(--color-text-dark);
+}
+
+/* THE SPEC CARD: a bright white panel that lifts off the silver background
+   with a soft, low shadow, like a printed sheet on a showroom stand. */
+.bio__spec {
+  padding: 1.75rem 1.75rem 0.75rem;
+  border: 1px solid rgba(24, 24, 27, 0.06);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-paper);
+  box-shadow: 0 30px 60px -36px rgba(24, 24, 27, 0.45);
+}
+
+/* THE TABLE: border-collapse: collapse merges neighbouring cell borders into
+   single lines (otherwise every cell draws its own, doubling them up). */
+.spec-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.spec-table caption {
+  padding-bottom: 1rem;
+  text-align: left;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+}
+
+.spec-table th,
+.spec-table td {
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--color-silver-deep);
+  text-align: left;
+  vertical-align: top;
+}
+
+/* Row labels: small, grey capitals. Values: bold and dark. */
+.spec-table th {
+  width: 42%;
+  padding-right: 1rem;
+  font-weight: 400;
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.spec-table td {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--color-text-dark);
+}
+
+
+/* ==========================================================================
+   10. TWO LANES (career aspirations)
+   ========================================================================== */
+.lanes__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-bottom: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.lanes__lead {
+  max-width: 32ch;
+  color: var(--color-chrome);
+}
+
+/* THREE-COLUMN GRID: lane, road marking, lane.
+   "auto" makes the middle column exactly as wide as the marking needs. */
+.lanes__grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+/* The second lane starts lower than the first, so the two read as lanes
+   on a road rather than two boxes in a row. */
+.lane--offset {
+  margin-top: clamp(3rem, 8vw, 7rem);
+}
+
+.lane__img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+
+.lane__body {
+  padding-top: 1.5rem;
+}
+
+.lane__title {
+  margin-bottom: 0.75rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-h3);
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.lane__body p:last-child {
+  max-width: 44ch;
+  color: var(--color-chrome);
+}
+
+/* THE ROAD MARKING: a 4px-wide strip as tall as the lanes (align-self: stretch).
+   Its ::before layer is drawn with a repeating gradient: 22px of white, then
+   22px of nothing, over and over, which makes dashes. The layer starts one
+   dash-pair (44px) above the strip and slides down by exactly 44px on a loop,
+   so the dashes appear to flow past forever, like driving down a road. */
+.lanes__divider {
+  position: relative;
+  align-self: stretch;
+  width: 4px;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.lanes__divider::before {
+  content: "";
+  position: absolute;
+  inset: -44px 0 0 0;
+  background-image: repeating-linear-gradient(to bottom, rgba(232, 236, 240, 0.55) 0 22px, transparent 22px 44px);
+  animation: road 1.6s linear infinite;
+}
+
+
+/* ==========================================================================
+   11. EXPLORE BENTO GRID (Magic UI "Bento Grid" + "Magic Card" ports)
+   ========================================================================== */
+.explore .section-title {
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+/* THE MOSAIC: 3 equal columns. grid-auto-rows sets the height of every row.
+   Tiles then claim extra space with "span": About spans 2 columns,
+   Projects spans 2 rows, and the rest fill the gaps automatically. */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: clamp(15rem, 21vw, 19rem);
+  gap: 1rem;
+}
+
+.bento-card--about {
+  grid-column: span 2;
+}
+
+.bento-card--projects {
+  grid-column: 3;
+  grid-row: span 2;
+}
+
+/* EACH TILE is one link. position: relative lets the photo, shading and glow
+   be layered inside it with position: absolute. flex + align-items: flex-end
+   pushes the text to the bottom of the tile. */
+.bento-card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-graphite);
+  color: var(--color-paper);
+  text-decoration: none;
+}
+
+.bento-card:focus-visible {
+  outline-color: var(--color-blue-deep);
+  outline-offset: 4px;
+}
+
+/* The photo fills the tile behind everything else (z-index: -2). */
+.bento-card__img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-out);
+}
+
+/* SHADING: a dark gradient from the bottom up, so the white text on top of
+   the photo always has enough contrast to read. */
+.bento-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to top, rgba(15, 16, 19, 0.94) 0%, rgba(15, 16, 19, 0.55) 42%, rgba(15, 16, 19, 0) 100%);
+}
+
+/* THE POINTER GLOW (Magic Card, orb mode): a soft circle of blue-white light.
+   main.js moves it to the pointer with transform. It is invisible until the
+   card is hovered. mix-blend-mode: screen adds its light to the photo below,
+   the way a real light brightens a surface. */
+.bento-card__glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.42), rgba(232, 236, 240, 0.12) 45%, transparent 70%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: opacity 300ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.bento-card__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+  padding: clamp(1.25rem, 2.4vw, 2rem);
+}
+
+.bento-card__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-h3);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.bento-card__text {
+  max-width: 40ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: rgba(232, 236, 240, 0.86);
+}
+
+.bento-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+/* The SVG arrow inside the link text slides a little to the right on hover. */
+.bento-card__cta .icon {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+/* THE CONTACT TILE has no photo: a solid block of brand blue instead. */
+.bento-card--contact {
+  background-color: var(--color-blue);
+}
+
+.bento-card--contact::after {
+  display: none;
+}
+
+.bento-card--contact .bento-card__text {
+  color: #fff;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bento-card:hover .bento-card__glow {
+    opacity: 1;
+  }
+
+  .bento-card:hover .bento-card__img {
+    transform: scale(1.04);
+  }
+
+  .bento-card:hover .bento-card__cta .icon {
+    transform: translateX(4px);
+  }
+}
+
+
+/* ==========================================================================
+   12. FOOTER
+   ========================================================================== */
+.site-footer {
+  padding-top: clamp(3.5rem, 6vw, 5rem);
+  background-color: var(--color-ink);
+  color: var(--color-chrome);
+  font-size: 0.875rem;
+}
+
+/* THREE COLUMNS: about text (widest), links, song credit. */
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 2.5rem;
+  padding-bottom: 3rem;
+}
+
+.footer__brand {
+  margin-bottom: 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.18em;
+  color: var(--color-paper);
+}
+
+.footer__about p:last-child {
+  max-width: 40ch;
+}
+
+.footer__nav ul {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.footer__nav a {
+  display: inline-block;
+  padding-block: 0.3rem;
+  text-decoration: none;
+  transition: color var(--duration-fast) ease;
+}
+
+.footer__nav a[aria-current="page"] {
+  color: var(--color-paper);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .footer__nav a:hover {
+    color: var(--color-paper);
+  }
+}
+
+.footer__song {
+  max-width: 30ch;
+}
+
+/* BOTTOM STRIP: copyright and credits, with a thin line above. */
+.footer__base {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 2rem;
+  padding-top: 1.5rem;      /* space between the line and the text */
+  padding-bottom: 2rem;
+  border-top: 1px solid var(--color-hairline-dark);
+  font-size: 0.8125rem;
+}
+
+
+/* ==========================================================================
+   13. POPUPS (<dialog>)
+   The site has two popups: the music question on the homepage and the
+   project plans on the Projects page. Both carry the class "modal", so they
+   share these rules. The browser already centres a modal <dialog> on screen
+   and dims the page with a ::backdrop layer; we restyle both and animate
+   them in and out.
+   ========================================================================== */
+.modal {
+  max-height: 88svh;            /* never taller than the screen; extra content scrolls inside */
+  padding: 2rem;
+  border: 1px solid var(--color-hairline-dark);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-graphite);
+  color: var(--color-silver);
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.6);
+}
+
+/* [open] matches the dialog while it is showing. The entrance plays once
+   when it opens: 250ms, fading in while growing from 96% to full size.
+   (Never from 0: nothing in the real world appears from nothing.) */
+.modal[open] {
+  animation: dialog-in var(--duration-ui) var(--ease-out);
+}
+
+.modal::backdrop {
+  background: rgba(10, 11, 13, 0.66);
+}
+
+.modal[open]::backdrop {
+  animation: fade-in var(--duration-ui) var(--ease-out);
+}
+
+/* main.js adds .is-closing first, waits for this shorter exit animation,
+   then really closes the dialog. Exits are quicker than entrances: the
+   visitor has already decided, so we get out of their way. */
+.modal.is-closing {
+  animation: dialog-out var(--duration-fast) var(--ease-out) forwards;
+}
+
+.modal.is-closing::backdrop {
+  animation: fade-out var(--duration-fast) var(--ease-out) forwards;
+}
+
+/* The music popup is small and narrow. */
+.music-dialog {
+  width: min(92vw, 440px);
+}
+
+.music-dialog__title {
+  margin: 1.25rem 0 0.75rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.music-dialog__text {
+  font-size: 0.9375rem;
+  color: var(--color-chrome);
+}
+
+.music-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+
+/* ==========================================================================
+   14. SCROLL REVEAL
+   @media (scripting: enabled) only applies these rules when JavaScript is
+   running. That matters: if JavaScript were switched off, nothing would ever
+   add .revealed, and hidden content would stay hidden forever. This way,
+   without JavaScript, everything is simply visible from the start.
+   ========================================================================== */
+@media (scripting: enabled) {
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.8s var(--ease-out) var(--delay, 0s),
+      transform 0.8s var(--ease-out) var(--delay, 0s);
+  }
+
+  /* main.js adds .revealed when the element scrolls into view. */
+  .reveal.revealed {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+
+/* ==========================================================================
+   15. KEYFRAME ANIMATIONS
+   @keyframes defines the steps of an animation; elements use them by name
+   with the animation property. Only transform and opacity change, because
+   those two can animate smoothly on the graphics card.
+   ========================================================================== */
+
+/* Aceternity's spotlight: slides from up-left and grows from half size. */
+@keyframes spotlight {
+  from {
+    opacity: 0;
+    transform: translate(-72%, -62%) scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+  }
+}
+
+/* Name lines rising into their masks. */
+@keyframes rise {
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Small hero items fading up into place. */
+@keyframes fade-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* The portrait settling. */
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Shine border light travelling corner to corner and back. */
+@keyframes shine {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-66.667%, -66.667%);
+  }
+}
+
+/* Road marking dashes flowing down (desktop) or sideways (mobile). */
+@keyframes road {
+  to {
+    transform: translateY(44px);
+  }
+}
+
+@keyframes road-across {
+  to {
+    transform: translateX(44px);
+  }
+}
+
+/* Equaliser bars rising and falling between short and full height. */
+@keyframes eq-level {
+  from {
+    transform: scaleY(0.25);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Popup in and out. A keyframe with only "from" animates from those values
+   to the element's normal style; one with only "to" animates from normal to those values. */
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes dialog-out {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+
+/* ==========================================================================
+   16. RESPONSIVE: TABLET (screens 1024px wide or less)
+   A media query applies the rules inside it only when its condition is true.
+   These override the desktop rules above for medium screens.
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .spotlight {
+    width: 138%;
+  }
+
+  /* The text column is narrower here, so the name gets a smaller size
+     (redefining the variable changes every place that uses it). */
+  :root {
+    --text-hero: clamp(2.1rem, 5.4vw, 4rem);
+  }
+
+  /* Tablets held upright are very tall, so a full-screen hero would leave
+     big empty bands above and below the content. Let the hero be as tall as
+     its content instead, with generous padding. */
+  .hero {
+    min-height: auto;
+    padding-top: calc(var(--nav-height) + 4rem);
+    padding-bottom: 5rem;
+  }
+
+  .hero__portrait {
+    width: min(40vw, calc((100svh - var(--nav-height) - 10rem) * 0.8));
+  }
+
+  /* Bento: two columns. About still spans both; Projects stays tall. */
+  .bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 16rem;
+  }
+
+  .bento-card--projects {
+    grid-column: auto;
+  }
+
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footer__about {
+    grid-column: 1 / -1;   /* the about text takes a full row on its own */
+  }
+}
+
+
+/* ==========================================================================
+   17. RESPONSIVE: MOBILE (screens 768px wide or less)
+   ========================================================================== */
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 64px;
+  }
+
+  /* --- Navigation: the links move into a drop-down panel --- */
+
+  /* The round menu button appears. */
+  .nav__menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(232, 236, 240, 0.22);
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  /* Two lines drawn with spans make the "burger" icon. When the menu opens
+     they move to the middle and rotate in opposite directions to form an X. */
+  .burger {
+    position: relative;
+    width: 18px;
+    height: 12px;
+  }
+
+  .burger span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background-color: var(--color-paper);
+    transition: transform var(--duration-ui) var(--ease-out);
+  }
+
+  .burger span:first-child { top: 1px; }
+  .burger span:last-child { bottom: 1px; }
+
+  .is-menu-open .burger span:first-child { transform: translateY(4px) rotate(45deg); }
+  .is-menu-open .burger span:last-child { transform: translateY(-4px) rotate(-45deg); }
+
+  /* THE PANEL: fixed just below the header and stacked vertically.
+     Closed, it is transparent, nudged up 8px, and visibility: hidden (which
+     also stops keyboard users tabbing into links they cannot see).
+     The visibility change waits until the fade has finished (the 250ms delay). */
+  .nav__links {
+    position: fixed;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0;
+    margin-left: 0;
+    padding: 0.5rem var(--gutter) 1.5rem;
+    background-color: var(--color-ink);   /* solid, so the page behind never shows through the links */
+    border-bottom: 1px solid var(--color-hairline-dark);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition:
+      opacity var(--duration-ui) var(--ease-out),
+      transform var(--duration-ui) var(--ease-out),
+      visibility 0s linear var(--duration-ui);
+  }
+
+  .is-menu-open .nav__links {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition:
+      opacity var(--duration-ui) var(--ease-out),
+      transform var(--duration-ui) var(--ease-out),
+      visibility 0s;
+  }
+
+  .nav__links a {
+    padding: 0.95rem 0;
+    border-bottom: 1px solid var(--color-hairline-dark);
+    border-radius: 0;
+    font-size: 1rem;
+  }
+
+  .nav__links a[aria-current="page"] {
+    background: none;
+    color: var(--color-blue-bright);
+  }
+
+  /* The music button shrinks to a round icon. Its word "Music" is hidden
+     visually but still read by screen readers, so the button keeps its name. */
+  .music-toggle {
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .music-toggle__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  /* --- Hero: one column --- */
+  .hero {
+    min-height: auto;
+    padding-top: calc(var(--nav-height) + 2rem);
+    padding-bottom: 3.5rem;
+  }
+
+  .spotlight {
+    top: -10rem;
+    left: 0;
+  }
+
+  /* display: contents makes the text wrapper "disappear" from the layout, so
+     its children become direct grid items. That lets us use "order" to slot
+     the photo between the name and the rest of the text on phones. */
+  .hero__inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero__copy {
+    display: contents;
+  }
+
+  .hero__welcome  { order: 1; }
+  .hero__name     { order: 2; }
+  .hero__portrait { order: 3; }
+  .hero__role     { order: 4; }
+  .hero__intro    { order: 5; }
+  .hero__actions  { order: 6; }
+
+  .hero__portrait {
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  .hero__name {
+    margin-block: 0.9rem 1.5rem;
+  }
+
+  /* The rotating word gets its own line, so a long word never wraps and
+     pushes the text below it up and down. */
+  .word-rotate {
+    display: block;
+    width: fit-content;
+  }
+
+  /* --- Facts strip: tighter spacing --- */
+  .facts-strip__list {
+    gap: 0.5rem 1rem;
+  }
+
+  .facts-strip__list li {
+    font-size: 0.6875rem;
+  }
+
+  /* --- Biography: stack the text above the table --- */
+  .bio__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bio__spec {
+    padding: 1.25rem 1.25rem 0.5rem;
+  }
+
+  /* --- Lanes: stack, with the road marking lying across between them --- */
+  .lanes__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+
+  .lane--offset {
+    margin-top: 0;
+  }
+
+  .lanes__divider {
+    width: 100%;
+    height: 4px;
+  }
+
+  .lanes__divider::before {
+    inset: 0 0 0 -44px;
+    background-image: repeating-linear-gradient(to right, rgba(232, 236, 240, 0.55) 0 22px, transparent 22px 44px);
+    animation-name: road-across;
+  }
+
+  /* --- Bento: one column, every tile the same size --- */
+  .bento {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 15rem;
+  }
+
+  .bento-card--about,
+  .bento-card--projects {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  /* --- Footer: one column --- */
+  .footer__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
+  }
+
+  .modal {
+    padding: 1.5rem;
+  }
+}
+
+
+/* ==========================================================================
+   18. REDUCED MOTION
+   If the visitor's device asks for less motion, keep the gentle fades (they
+   help show what changed) but drop the movement: nothing slides, scales,
+   loops or scrolls by itself. Everything still appears, just more calmly.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* The spotlight appears in its final position with a simple fade. */
+  .spotlight {
+    transform: translate(-50%, -40%);
+    animation: fade-in 0.6s ease 0.2s forwards;
+  }
+
+  .line__inner,
+  .hero__fade {
+    transform: none;
+    animation: fade-in 0.5s ease var(--delay, 0s) both;
+  }
+
+  .hero__photo-in img {
+    animation: fade-in 0.5s ease both;
+  }
+
+  /* The shine's light is hidden (a frozen band of light would look like a
+     glitch); the frame keeps its faint, even edge. */
+  .shine-border__light {
+    display: none;
+  }
+
+  /* Looping movement stops completely. */
+  .lanes__divider::before,
+  .music-toggle.is-playing .eq span,
+  .eq.is-demo span {
+    animation: none;
+  }
+
+  .reveal {
+    transform: none;
+    transition: opacity 0.5s ease var(--delay, 0s);
+  }
+
+  .modal[open] {
+    animation-name: fade-in;
+  }
+
+  .modal.is-closing {
+    animation-name: fade-out;
+  }
+
+  .bento-card__img {
+    transition: none;
+  }
+}
+
+
+/* ==========================================================================
+   19. 404 PAGE (404.html)
+   The "page not found" page reuses the hero's dark background and spotlight
+   through the .hero class; these rules add what belongs to it alone.
+   ".hero.notfound" (two classes) is more specific than ".hero" alone, so
+   these win over the hero rules in the tablet and mobile sections above.
+   ========================================================================== */
+
+/* Always fill the screen, on every device, and centre the message vertically. */
+.hero.notfound {
+  min-height: 100svh;
+  padding-top: calc(var(--nav-height) + 3rem);
+  padding-bottom: 5rem;
+}
+
+.notfound__inner {
+  position: relative;
+  z-index: 1;   /* above the spotlight */
+}
+
+/* "404": big, in the display font, but in the quieter chrome grey so the
+   heading under it still reads as the main message. */
+.notfound__code {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(4.5rem, 2rem + 12vw, 11rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--color-chrome);
+}
+
+.notfound__title {
+  margin-top: 1.25rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-h2);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.notfound__text {
+  max-width: 46ch;
+  margin-top: 1.25rem;
+  color: var(--color-chrome);
+}
+
+/* ==========================================================================
+   20. INNER PAGES: SHARED PIECES
+   About, Projects, Planner and Contact all open with the same kind of dark
+   "page hero" and reuse the panels, chips, pills, form fields and the blue
+   call-to-action band defined here.
+   ========================================================================== */
+
+/* PAGE HERO: a shorter version of the homepage hero. The top padding adds the
+   nav's height so the title is never hidden behind the fixed navigation bar. */
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  padding: calc(var(--nav-height) + clamp(3.5rem, 2.5rem + 5vw, 7.5rem)) 0 clamp(3.5rem, 2.5rem + 4vw, 6rem);
+  background: radial-gradient(120% 90% at 30% 0%, #1C1D22 0%, var(--color-ink) 62%);
+}
+
+.page-hero__inner {
+  position: relative;
+  z-index: 1;   /* above the spotlight */
+}
+
+/* The page title uses the same size variable as the homepage name.
+   max-width in "ch" stops a long title running across the whole screen. */
+.page-hero__title {
+  max-width: 14ch;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-hero);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.page-hero__lead {
+  max-width: 52ch;
+  margin-top: 1.5rem;
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+  color: var(--color-chrome);
+}
+
+/* SECTION HEAD: a section title with a short line of text beside it.
+   Flexbox with wrap: side by side when there is room, stacked when not. */
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-bottom: clamp(2rem, 4vw, 3.5rem);
+}
+
+.section-lead {
+  max-width: 40ch;
+}
+
+/* The lead text takes a quieter colour that suits whichever background it sits on. */
+.section--silver .section-lead {
+  color: var(--color-text-muted);
+}
+
+.section--dark .section-lead {
+  color: var(--color-chrome);
+}
+
+/* LINKS TO A PART OF THE PAGE: an element with an id can be jumped to with
+   href="#that-id". scroll-margin-top leaves room for the fixed nav, so the
+   section's heading is not hidden under it after the jump. */
+.jump-target {
+  scroll-margin-top: var(--nav-height);
+}
+
+/* PANEL: the white card used for forms, lists and goals on silver sections. */
+.panel {
+  padding: clamp(1.25rem, 2.5vw, 2rem);
+  border: 1px solid rgba(24, 24, 27, 0.06);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-paper);
+  color: var(--color-text-dark);
+  box-shadow: 0 30px 60px -40px rgba(24, 24, 27, 0.45);
+}
+
+/* The dark version, for panels that sit on graphite sections. */
+.panel--dark {
+  border-color: var(--color-hairline-dark);
+  background-color: var(--color-graphite-raised);
+  color: var(--color-silver);
+  box-shadow: none;
+}
+
+/* Small headings inside panels and cards. */
+.card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-h3);
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+/* CHIPS: small pill-shaped buttons used for filters and in-page links.
+   aria-pressed="true" (set by main.js) marks the chosen filter, and the
+   CSS gives it a dark fill so the choice is visible. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--color-field-border);
+  border-radius: 999px;
+  background-color: transparent;
+  color: var(--color-text-dark);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-fast) ease;
+}
+
+.chip:active {
+  transform: scale(0.97);
+}
+
+.chip[aria-pressed="true"] {
+  border-color: var(--color-text-dark);
+  background-color: var(--color-text-dark);
+  color: var(--color-paper);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chip:hover {
+    border-color: var(--color-text-dark);
+  }
+}
+
+/* PILLS: small status labels such as "Live", "Concept" or "Learning". */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* The filled version: brand blue with white text. */
+.pill--solid {
+  border-color: var(--color-blue);
+  background-color: var(--color-blue);
+  color: #fff;
+}
+
+/* BUTTON VARIANTS used on the inner pages. */
+.btn--outline {
+  border-color: var(--color-text-dark);
+  background-color: transparent;
+  color: var(--color-text-dark);
+}
+
+.btn--light {
+  background-color: #fff;
+  color: var(--color-blue-deep);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn--outline:hover {
+    background-color: var(--color-text-dark);
+    color: var(--color-paper);
+  }
+
+  .btn--light:hover {
+    background-color: var(--color-silver);
+  }
+}
+
+/* FORM FIELDS (planner and contact). CSS Grid with a small gap stacks the
+   label, the box, any hint and any error message neatly. */
+.field {
+  display: grid;
+  align-content: start;   /* keep label and box at the top, never stretched apart */
+  gap: 0.45rem;
+}
+
+.field + .field,
+.field-row + .field,
+.field + .field-row {
+  margin-top: 1.25rem;
+}
+
+.field label {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--color-text-dark);
+}
+
+.field__optional {
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.field__hint {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+/* The input boxes. font: inherit makes them use the site font instead of the
+   browser's default. A 16px (1rem) font also stops iPhones zooming in when a
+   box is tapped. */
+.field input,
+.field textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-field-border);
+  border-radius: var(--radius);
+  background-color: #fff;
+  color: var(--color-text-dark);
+  font: inherit;
+  font-size: 1rem;
+  transition: border-color var(--duration-fast) ease;
+}
+
+.field textarea {
+  min-height: 9rem;
+  resize: vertical;   /* the visitor can drag it taller, but not wider */
+}
+
+.field input:focus-visible,
+.field textarea:focus-visible {
+  border-color: var(--color-blue-deep);
+  outline: 2px solid var(--color-blue-deep);
+  outline-offset: 1px;
+}
+
+/* aria-invalid="true" is set by main.js when a field fails a check. The red
+   border shows which box needs attention; the message under it says why. */
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.field__error {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+/* :empty matches an element with nothing inside it. An error message with no
+   text is removed from the layout, so it leaves no gap. */
+.field__error:empty {
+  display: none;
+}
+
+/* Two fields side by side (CSS Grid, two equal columns). The grid's gap
+   already spaces them, so the stacking margin above is switched off inside it. */
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.field-row > .field {
+  margin-top: 0;
+}
+
+/* CTA BAND: the blue strip near the bottom of inner pages pointing to the next step. */
+.cta-band {
+  padding-block: clamp(3.5rem, 2.5rem + 4vw, 5.5rem);
+  background-color: var(--color-blue);
+  color: #fff;
+}
+
+.cta-band__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem 3rem;
+}
+
+.cta-band__title {
+  max-width: 18ch;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-h2);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.cta-band__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.75rem;
+}
+
+/* On blue, the arrow link turns white so it stays readable. */
+.cta-band .link-arrow {
+  color: #fff;
+}
+
+.cta-band .link-arrow span {
+  text-decoration-color: rgba(255, 255, 255, 0.6);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta-band .link-arrow:hover span {
+    text-decoration-color: #fff;
+  }
+}
+
+@media (max-width: 768px) {
+  .field-row {
+    grid-template-columns: minmax(0, 1fr);   /* one column on phones */
+  }
+}
+
+
+/* ==========================================================================
+   21. ABOUT PAGE (about.html)
+   ========================================================================== */
+
+/* INTRO: portrait on the left, introduction on the right. */
+.about-intro__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(2rem, 6vw, 6rem);
+  align-items: center;
+}
+
+.about-intro__portrait {
+  width: 100%;
+  max-width: 420px;
+}
+
+.about-intro__text p {
+  max-width: 54ch;
+  margin-top: 1.25rem;
+  color: var(--color-text-muted);
+}
+
+.about-intro__text .section-title + p {
+  margin-top: 1.75rem;
+  font-size: 1.125rem;
+  color: var(--color-text-dark);
+}
+
+/* "On this page": a row of chips that jump to each section below. */
+.page-index {
+  margin-top: 2rem;
+}
+
+.page-index__label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.page-index ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+/* EDUCATION: the university card beside what the course is teaching. */
+.edu__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+.edu__school {
+  margin-top: 1rem;
+  color: var(--color-chrome);
+}
+
+.edu__facts {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* A description list (<dl>) pairs labels (<dt>) with values (<dd>).
+   Grid lines them up in two neat columns. */
+.edu__facts div {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-hairline-dark);
+}
+
+.edu__facts dt {
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-chrome);
+}
+
+.edu__facts dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--color-paper);
+}
+
+.edu__learning > p {
+  color: var(--color-chrome);
+  max-width: 52ch;
+}
+
+/* Three columns: HTML, CSS and JavaScript. */
+.learn-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.learn-grid h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-transform: uppercase;
+  color: var(--color-blue-bright);
+}
+
+.learn-grid ul {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+  color: var(--color-silver);
+}
+
+/* GOALS: two cards side by side. */
+.goals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+/* The round icon badge at the top of each goal card. */
+.icon-badge {
+  display: grid;
+  place-items: center;   /* centres the icon both ways in one line */
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: var(--color-blue);
+  color: #fff;
+}
+
+.goal .card-title {
+  margin-top: 1.5rem;
+}
+
+.goal p {
+  max-width: 44ch;
+  margin-top: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* SKILLS TABLE: a real table with a header row (<thead>). */
+.skills-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.skills-table th,
+.skills-table td {
+  padding: 1rem 1rem 1rem 0;
+  border-bottom: 1px solid var(--color-hairline-dark);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.skills-table thead th {
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-chrome);
+}
+
+.skills-table tbody th {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.skills-table td {
+  color: var(--color-chrome);
+}
+
+/* The "Learning" pill on dark: blue text and border. */
+.skills-table .pill {
+  color: var(--color-blue-bright);
+}
+
+.skills-table .pill--solid {
+  color: #fff;
+}
+
+/* HOBBIES: two picture cards. */
+.hobbies {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 3vw, 2.5rem);
+}
+
+.hobby-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+
+.hobby-card .card-title {
+  margin-top: 1.5rem;
+}
+
+.hobby-card p {
+  max-width: 44ch;
+  margin-top: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 1024px) {
+  .edu__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .about-intro__grid,
+  .goals,
+  .hobbies {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .learn-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* SAFETY NET: if the table were ever wider than a small phone, it would
+     scroll sideways inside its own box instead of widening the whole page. */
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  /* Smaller text and padding so all three columns fit on a phone. */
+  .skills-table th,
+  .skills-table td {
+    padding-right: 0.6rem;
+    font-size: 0.8125rem;
+  }
+
+  .skills-table tbody th {
+    font-size: 0.75rem;
+  }
+}
+
+
+/* ==========================================================================
+   22. PROJECTS PAGE (projects.html)
+   ========================================================================== */
+
+/* FILTER BAR: the chips on the left, the "Showing ..." message on the right. */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.filter-bar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-bar__count {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* THE GRID: three columns. The featured (live) project spans all of them. */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.project-card--featured {
+  grid-column: 1 / -1;
+}
+
+/* Each card: a white panel. flex-direction: column stacks image and text,
+   and margin-top: auto on the actions pushes the buttons to the bottom, so
+   buttons line up across cards of different text lengths. */
+.project {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(24, 24, 27, 0.06);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-paper);
+  box-shadow: 0 30px 60px -40px rgba(24, 24, 27, 0.45);
+}
+
+.project__media {
+  overflow: hidden;
+  background-color: var(--color-graphite);
+}
+
+.project__media img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-out);
+}
+
+.project__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.85rem;
+  padding: clamp(1.25rem, 2.2vw, 1.75rem);
+}
+
+.project__status {
+  color: var(--color-text-muted);
+}
+
+.project__desc {
+  color: var(--color-text-muted);
+}
+
+/* The small line saying the concept screens use made-up example data. */
+.project__note {
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+/* Technology tags: a list laid out as a wrapping row of small labels. */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tags li {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background-color: var(--color-silver);
+  font-size: 0.75rem;
+  color: var(--color-text-dark);
+}
+
+.project__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+/* The featured card lies sideways on wide screens: picture left, text right. */
+.project-card--featured .project {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+
+.project-card--featured .project__media img {
+  height: 100%;
+}
+
+.project-card--featured .project__body {
+  justify-content: center;
+}
+
+/* A card that has just been shown by a filter fades up into place. */
+.project-card.is-entering {
+  animation: fade-up-small var(--duration-ui) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project:hover .project__media img {
+    transform: scale(1.03);
+  }
+}
+
+/* THE PLAN POPUP: wider than the music popup, with room to read. */
+.plan-dialog {
+  width: min(92vw, 640px);
+}
+
+.plan-dialog__close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--color-hairline-dark);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-silver);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) ease, transform var(--duration-fast) var(--ease-out);
+}
+
+.plan-dialog__close:active {
+  transform: scale(0.95);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .plan-dialog__close:hover {
+    border-color: var(--color-silver);
+  }
+}
+
+/* The popup's heading, filled in with the project's name by main.js. */
+.plan-dialog__title {
+  padding-right: 3rem;   /* keeps the title clear of the close button */
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  text-transform: uppercase;
+  color: var(--color-paper);
+}
+
+.plan h3 {
+  margin-top: 1.5rem;
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-blue-bright);
+}
+
+.plan p,
+.plan li {
+  color: var(--color-chrome);
+  font-size: 0.9375rem;
+}
+
+.plan p {
+  margin-top: 0.6rem;
+}
+
+/* A normal bulleted list, with the bullets restored (the reset removed them). */
+.plan ul {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+  padding-left: 1.2rem;
+  list-style: disc;
+}
+
+@media (max-width: 1024px) {
+  .project-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-card--featured .project {
+    display: flex;   /* back to picture-above-text */
+  }
+}
+
+@media (max-width: 768px) {
+  .project-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* ==========================================================================
+   23. ACADEMIC PLANNER PAGE (planner.html)
+   ========================================================================== */
+
+/* Two columns: the "add a task" form and the task list. */
+.planner__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* position: sticky keeps the form in view while the list scrolls past,
+   stopping just below the fixed nav. */
+.planner__add {
+  position: sticky;
+  top: calc(var(--nav-height) + 1.5rem);
+}
+
+.planner__add .card-title,
+.planner__list .card-title {
+  margin-bottom: 1.25rem;
+}
+
+.planner__add .btn {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.planner__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.planner__head .card-title {
+  margin-bottom: 0;
+}
+
+.planner__count {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* PROGRESS BAR: a grey track with a blue bar inside. main.js sets the bar's
+   transform to scaleX(0) for none done up to scaleX(1) for all done.
+   transform-origin: left makes it grow from the left edge. Scaling (instead
+   of changing the width) lets the browser animate it smoothly. */
+.progress {
+  height: 6px;
+  margin-top: 1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: var(--color-silver);
+}
+
+.progress__bar {
+  display: block;
+  height: 100%;
+  background-color: var(--color-blue);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.45s var(--ease-out);
+}
+
+.planner__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+/* ONE TASK ROW: checkbox and text on the left, delete button on the right. */
+.task {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--color-silver-deep);
+}
+
+/* The <label> wraps the checkbox and the text, so clicking anywhere on the
+   text ticks the box too. flex: 1 lets it take all the spare width. */
+.task__check {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.9rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+/* THE REAL CHECKBOX is kept (keyboards and screen readers use it) but made
+   invisible and laid exactly over the drawn box beside it. */
+.task__toggle {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  opacity: 0;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+/* THE DRAWN BOX that people see. */
+.task__box {
+  display: grid;
+  flex: 0 0 24px;
+  place-items: center;
+  height: 24px;
+  border: 2px solid var(--color-field-border);
+  border-radius: 6px;
+  color: #fff;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease;
+}
+
+/* The tick inside starts small and invisible. */
+.task__box svg {
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+}
+
+/* "+" is the adjacent sibling selector: the .task__box straight after a
+   CHECKED checkbox turns blue and shows its tick. */
+.task__toggle:checked + .task__box {
+  border-color: var(--color-blue);
+  background-color: var(--color-blue);
+}
+
+.task__toggle:checked + .task__box svg {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Keyboard focus lands on the invisible checkbox, so show the ring on the box. */
+.task__toggle:focus-visible + .task__box {
+  outline: 2px solid var(--color-blue-deep);
+  outline-offset: 2px;
+}
+
+.task__text {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.task__title {
+  font-weight: 700;
+  color: var(--color-text-dark);
+  overflow-wrap: anywhere;   /* a very long word wraps instead of overflowing */
+}
+
+.task__meta {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.task__meta .is-overdue {
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+/* A finished task: crossed out and greyed. */
+.task.is-done .task__title {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+}
+
+.task__delete {
+  display: grid;
+  flex: 0 0 44px;
+  place-items: center;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease, color var(--duration-fast) ease, transform var(--duration-fast) var(--ease-out);
+}
+
+.task__delete:active {
+  transform: scale(0.94);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .task__delete:hover {
+    background-color: var(--color-silver);
+    color: var(--color-danger);
+  }
+}
+
+/* ADD AND REMOVE ANIMATIONS: main.js adds .is-new to a task it has just
+   added, and .is-leaving to one being deleted (it removes the row from the
+   page once the short exit has played). */
+.task.is-new {
+  animation: fade-down-small var(--duration-ui) var(--ease-out);
+}
+
+.task.is-leaving {
+  animation: task-out var(--duration-fast) var(--ease-out) forwards;
+}
+
+.task-empty {
+  padding: 2.5rem 1rem;
+  border-top: 1px solid var(--color-silver-deep);
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.planner__foot {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-silver-deep);
+}
+
+/* A button that looks like a text link. */
+.link-button {
+  min-height: 44px;
+  padding: 0.5rem 0;
+  border: 0;
+  background: none;
+  color: var(--color-text-dark);
+  font-weight: 700;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+  cursor: pointer;
+}
+
+.link-button:disabled {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1024px) {
+  .planner__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .planner__add {
+    position: static;   /* no sticking when the form sits above the list */
+  }
+}
+
+
+/* ==========================================================================
+   24. CONTACT PAGE (contact.html)
+   ========================================================================== */
+.contact__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+}
+
+.contact-form .card-title {
+  margin-bottom: 0.5rem;
+}
+
+.contact-form__note {
+  margin-bottom: 1.75rem;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+.contact-form__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  margin-top: 1.75rem;
+}
+
+.form-status {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+/* HONEYPOT: a hidden trap field. People never see it, so they leave it empty;
+   spam robots fill in every box they find, and Netlify then ignores their
+   message. display: none hides it from sight and from screen readers. */
+.form-honeypot {
+  display: none;
+}
+
+/* SUCCESS MESSAGE shown in place of the form after sending. */
+.form-success .icon-badge {
+  margin-bottom: 1.5rem;
+}
+
+.form-success p {
+  max-width: 44ch;
+  margin-top: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.form-success .btn {
+  margin-top: 1.75rem;
+}
+
+.form-success:focus {
+  outline: none;   /* focus is moved here only so screen readers announce it */
+}
+
+/* TOPICS LIST beside the form: icon, title and a line of text per row. */
+.topics li {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 1.25rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--color-field-border);
+}
+
+.topics li:last-child {
+  border-bottom: 1px solid var(--color-field-border);
+}
+
+.topics h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  text-transform: uppercase;
+}
+
+.topics p {
+  margin-top: 0.35rem;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 1024px) {
+  .contact__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
+/* ==========================================================================
+   KEYFRAMES AND REDUCED MOTION FOR THE INNER PAGES
+   ========================================================================== */
+
+/* A short fade up, for project cards shown by a filter. */
+@keyframes fade-up-small {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* A short drop from above, for a newly added task. */
+@keyframes fade-down-small {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* A deleted task slides a little to the right as it fades away. */
+@keyframes task-out {
+  to {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-card.is-entering,
+  .task.is-new {
+    animation-name: fade-in;
+  }
+
+  .task.is-leaving {
+    animation-name: fade-out;
+  }
+
+  .progress__bar,
+  .project__media img {
+    transition: none;
+  }
+}
+/* Small spacing details for the inner pages. */
+.edu__degree {
+  margin-top: 1.25rem;
+  color: var(--color-paper);
+}
+
+/* In a column flex box, children stretch to full width by default.
+   align-self: flex-start keeps the status pill only as wide as its text. */
+.project__body > .pill {
+  align-self: flex-start;
+}
+
+.contact__aside .card-title {
+  margin-bottom: 1.25rem;
+}
